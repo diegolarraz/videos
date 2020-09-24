@@ -1,40 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchBar from './SearchBar';
 import youtube from '../apis/youtube';
 import VideoList from './VideoList';
 import VideoDetail from './VideoDetail';
+import useVideos from '../hooks/useVideos';
 
-class App extends React.Component {
-    state = { videos: [], selectedVideo: null };
-
-    componentDidMount() {
-        this.onTermSubmit('otter sounds');
-    }
-
-    onVideoSelect = video => {
-        this.setState({ selectedVideo: video });
-    };
+const App = () => {
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    //utilising custom hook
+    const [videos, search] = useVideos('catus');
     
-    onTermSubmit = async term => {
-        const response = await youtube.get('/search', {
-            params: {
-                q: term
-            }
-        });
-        this.setState({ videos: response.data.items, selectedVideo: response.data.items[0] });
-    };
+    useEffect(() => {
+        setSelectedVideo(videos[0]);
+    }, [videos]);
 
-    render() {
-        return(
-            <div className="ui container">
-                <SearchBar onSubmit={this.onTermSubmit} />
-                <div className="video-content">
-                    <VideoDetail video={this.state.selectedVideo} />
-                    <VideoList onVideoSelect={this.onVideoSelect} videos={this.state.videos} />
-                </div>
+    //setSelectedVideo(response.data.items[0]);
+
+
+    return(
+        <div className="ui container">
+            <SearchBar onSubmit={search} />
+            <div className="video-content">
+                <VideoDetail video={selectedVideo} />
+                <VideoList 
+                    onVideoSelect={(video) => setSelectedVideo(video)} 
+                    videos={videos} 
+                />
             </div>
-        );
-    }
+        </div>
+    );
 }
 
 export default App;
